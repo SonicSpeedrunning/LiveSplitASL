@@ -1,0 +1,2 @@
+# LiveSplitASL
+Autosplits for LiveSplit
