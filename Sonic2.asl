@@ -1,13 +1,25 @@
-state("Fusion")
+state("Fusion") //converts to big-endian
 {
 	byte seconds : "Fusion.exe", 0x2A52D4, 0xFE24;
 	byte minutes : "Fusion.exe", 0x2A52D4, 0xFE23;
 	byte lives   : "Fusion.exe", 0x2A52D4, 0xFE12;
     byte continues : "Fusion.exe", 0x2A52D4, 0xFE18;
 	byte introPlaying: "Fusion.exe", 0x2A52D4, 0xFFF1;
-	byte finalSplit:  "Fusion.exe", 0x2A52D4, 0xB44C;
+	byte finalSplit:  "Fusion.exe", 0x2A52D4, 0xF7AA;
     byte bossHP: "Fusion.exe", 0x2A52D4, 0xB461;
 	byte runStart:  "Fusion.exe", 0x2A52D4, 0xFE1D;
+}
+
+state("retroarch")  //little endian
+{
+	byte seconds : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE25;
+	byte minutes : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE22;
+	byte lives   : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE13;
+    byte continues : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE19;
+	byte introPlaying: "genesis_plus_gx_libretro.dll", 0xF39900, 0xFFF0;
+	byte finalSplit:  "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7AB;
+    byte bossHP: "genesis_plus_gx_libretro.dll", 0xF39900, 0xB460;
+	byte runStart:  "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE1E;
 }
 
 start
@@ -72,7 +84,7 @@ gameTime
 
     //main update
     if (
-        (current.seconds == (old.seconds + 1)) && (current.mins == old.mins) || 
+        (current.seconds == (old.seconds + 1)) && (current.minutes == old.minutes) || 
         (current.seconds == 0 && (current.minutes == (old.minutes + 1)))
        ) {
            current.totalTime++;
