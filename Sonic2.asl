@@ -72,7 +72,7 @@ gameTime
 
     //main update
     if (
-        (current.seconds == (old.seconds + 1)) || 
+        (current.seconds == (old.seconds + 1)) && (current.mins == old.mins) || 
         (current.seconds == 0 && (current.minutes == (old.minutes + 1)))
        ) {
            current.totalTime++;
