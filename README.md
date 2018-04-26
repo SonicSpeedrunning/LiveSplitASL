@@ -2,7 +2,7 @@
 Autosplits for LiveSplit
 
 # Sonic 2
-for Kega Fusion
+for Kega Fusion and RetroArch (Genesis Plus GX Core)
 
 Uses https://github.com/tenebrae101/Sonic1AutoSplitter as a base, but uses "dumb logic": the timer is only interested in increasing seconds and doesn't care what the actual timer is. If the game's timer increases by a second, so does the autosplit timer - any other modification to the timer is ignored. This bypasses issues handling deaths, checkpoint respawns and a game over/continue state.
 
@@ -18,7 +18,7 @@ Expects a split for every Act.
 
 
 # Sonic 3 & Knuckles
-For Kega Fusion and Gens Rerecording Project.
+For Kega Fusion, Gens Rerecording Project and RetroArch (Genesis Plus GX Core)
 
 Expansion from the Sonic 2 Autosplit, however as this game uses Real Time - Time Bonus, the timer logic was changed.
 
