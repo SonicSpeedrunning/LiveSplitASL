@@ -24,6 +24,19 @@ state("gens")
     byte ending :   "gens.exe", 0x40F5C, 0xEF73;
 }
 
+state("retroarch")
+{
+    short level :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEE4E;
+    byte zone   :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEE4F;
+    byte act    :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEE4E;
+    byte reset  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFFFC;
+    byte trigger  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF601; //new game is 8C
+    short timebonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    short ringbonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D4;
+    byte chara  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFF08;
+    byte ending :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEF73;
+}
+
 startup
 {
     settings.Add("actsplit", false, "Split on each Act (don't use if you zip into act 2!)");
@@ -41,6 +54,7 @@ start
 {
     vars.nextzone = 0;
     vars.nextact = 1;
+    print(String.Format("trigger: {0:X2}",current.trigger));
     if (current.trigger == 0x8C && current.act == 0 && current.zone == 0)
     {
         print(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
