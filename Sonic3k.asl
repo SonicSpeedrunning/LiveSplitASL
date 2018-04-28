@@ -7,8 +7,10 @@ state("Fusion")
     byte trigger  :   "Fusion.exe", 0x2A52D4, 0xF600; //new game is 8C
     short timebonus  :   "Fusion.exe", 0x2A52D4, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "Fusion.exe", 0x2A52D4, 0xF7D4;
-    short chara  :   "Fusion.exe", 0x2A52D4, 0xFF08;
-    byte ending :   "Fusion.exe", 0x2A52D4, 0xEF72;
+    byte chara  :   "Fusion.exe", 0x2A52D4, 0xFF09;
+    ulong dez2end : "Fusion.exe", 0x2A52D4, 0xFC00;
+    byte ddzboss : "Fusion.exe", 0x2A52D4, 0xB1E5;
+    byte sszboss : "Fusion.exe", 0x2A52D4, 0xB279;
 }
 
 state("gens")
@@ -21,7 +23,9 @@ state("gens")
     short timebonus  :   "gens.exe", 0x40F5C, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "gens.exe", 0x40F5C, 0xF7D4;
     byte chara  :   "gens.exe", 0x40F5C, 0xFF08;
-    byte ending :   "gens.exe", 0x40F5C, 0xEF73;
+    ulong dez2end : "gens.exe", 0x40F5C, 0xFC00;
+    byte ddzboss : "gens.exe", 0x40F5C, 0xB1E4;
+    byte sszboss : "gens.exe", 0x40F5C, 0xB278;
 }
 
 state("retroarch")
@@ -34,12 +38,23 @@ state("retroarch")
     short timebonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D4;
     byte chara  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFF08;
-    byte ending :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEF73;
+    ulong dez2end : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFC00;
+    byte ddzboss : "genesis_plus_gx_libretro.dll", 0xF39900, 0xB1E4;
+    byte sszboss : "genesis_plus_gx_libretro.dll", 0xF39900, 0xB278;
 }
 
 startup
 {
-    settings.Add("actsplit", false, "Split on each Act (don't use if you zip into act 2!)");
+    settings.Add("actsplit", false, "Split on each Act");
+    settings.SetToolTip("actsplit", "If unchecked, will only split at the end of each Zone.");
+    
+    settings.Add("act_mg1", false, "Ignore Marble Garden 1", "actsplit");
+    settings.Add("act_ic1", false, "Ignore Ice Cap 1", "actsplit");
+    settings.Add("act_lb1", false, "Ignore Launch Base 1", "actsplit");
+    
+    settings.SetToolTip("act_mg1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
+    settings.SetToolTip("act_ic1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
+    settings.SetToolTip("act_lb1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
 }
 
 init
@@ -48,13 +63,29 @@ init
     vars.stopwatch = new Stopwatch();
     vars.nextzone = 0;
     vars.nextact = 1;
+    vars.dez2split = false;
+    vars.sszsplit = false; //boss is defeated twice
+}
+
+update
+{
+    // Stores the curent phase the timer is in, so we can use the old one on the next frame.
+	current.timerPhase = timer.CurrentPhase;
+    
+    if ((old.timerPhase != current.timerPhase && old.timerPhase != TimerPhase.Paused) && current.timerPhase == TimerPhase.Running)
+    //pressed start run or autostarted run
+    {
+        print("run start detected");
+        
+        vars.nextzone = 0;
+        vars.nextact = 1;
+        vars.dez2split = false;
+        vars.sszsplit = false;
+    }
 }
 
 start
 {
-    vars.nextzone = 0;
-    vars.nextact = 1;
-    print(String.Format("trigger: {0:X2}",current.trigger));
     if (current.trigger == 0x8C && current.act == 0 && current.zone == 0)
     {
         print(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
@@ -64,10 +95,8 @@ start
 
 reset
 {
-    if (current.reset == 0 && old.reset != 0)
+    if (current.reset == 0 && old.reset != 0) //detecting memory checksum at end of RAM area being 0 - only changes if ROM is reloaded (Hard Reset)
     {
-        vars.nextzone = 0;
-        vars.nextact = 1;
         return true;
     }
 }
@@ -82,9 +111,6 @@ split
             //next act will be same zone, act increment, next zone will be current zone + 1 act 0
             case 0: //Angel Island
             case 1: //Hydrocity
-            case 2: //Marble Garden
-            case 5: //Icecap
-            case 6: //Launch Base
             case 8: //Sandopolis
                 vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
                 if (current.act == 1) //starting act 2
@@ -97,12 +123,48 @@ split
                     split = true;
                 }
                 break;
+            case 2: //Marble Garden
+                vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
+                if (current.act == 1) //starting act 2
+                {
+                    vars.nextzone++; //if we just incremented next act past act 2 increment the zone
+                    if (settings["actsplit"] && !settings["act_mg1"]) split = true;
+                }
+                else //starting act 1 of new zone
+                {
+                    split = true;
+                }
+                break;
             case 3: //Carnival Night
                 vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
                 if (current.act == 1) //starting act 2
                 {
                     vars.nextzone = 5; //next is Icecap
                     if (settings["actsplit"]) split = true;
+                }
+                else //starting act 1 of new zone
+                {
+                    split = true;
+                }
+                break;
+            case 5: //Icecap
+                vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
+                if (current.act == 1) //starting act 2
+                {
+                    vars.nextzone++; //if we just incremented next act past act 2 increment the zone
+                    if (settings["actsplit"] && !settings["act_ic1"]) split = true;
+                }
+                else //starting act 1 of new zone
+                {
+                    split = true;
+                }
+                break;
+            case 6: //Launch Base
+                vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
+                if (current.act == 1) //starting act 2
+                {
+                    vars.nextzone++; //if we just incremented next act past act 2 increment the zone
+                    if (settings["actsplit"] && !settings["act_lb1"]) split = true;
                 }
                 else //starting act 1 of new zone
                 {
@@ -187,21 +249,51 @@ split
                 vars.nextact = 0;
                 vars.nextzone = 12;
                 break;
-            case 12:
-                split = true;
-                break;
+            case 12: //Doomsday
+                break; //We have already split for DE2 by detecting the whiteout
         }
     }
+    
+    if (!vars.dez2split && current.zone == 17 && current.act == 0) //detect fade to white on death egg 2
+    {
+        if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
+            (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
+        {
+            print("DEZ2 Boss White Screen detected");
+            vars.dez2split = true;
+            split = true;
+        }
+    }
+    
+    if (current.zone == 12 && current.ddzboss == 255 && old.ddzboss == 0) //Doomsday boss detect final hit
+    {
+        print("Doomsday Zone Boss death detected");
+        split = true;
+    }
+    
+
+    if (current.chara == 3 && current.zone == 10) //detect final hit on Knux Sky Sanctuary Boss
+    {
+        if (current.sszboss == 0 && old.sszboss == 1)
+        {
+            if (vars.sszsplit)
+            {
+                print("Knuckles Final Boss death detected");
+                split = true;
+            }
+            else
+            {
+                print("Knuckles Final Boss 1st phase defeat detected");
+                vars.sszsplit = true;
+            }
+        }
+    }
+    
     if (split)
     {
-        print(String.Format("level: {0:X4} zone: {1} act: {2}", current.level, current.zone, current.act));
         print(String.Format("old level: {0:X4} old zone: {1} old act: {2}", old.level, old.zone, old.act));
+        print(String.Format("level: {0:X4} zone: {1} act: {2}", current.level, current.zone, current.act));
         print(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
-        return true;
-    }
-    if (current.ending == 255)
-    {
-        print("Ending routine running");
         return true;
     }
 }
