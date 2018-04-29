@@ -241,11 +241,11 @@ split
                 else
                 {
                     vars.nextact = 0;
-                    vars.nextzone = 17;
+                    vars.nextzone = 23;
                     if (settings["actsplit"]) split = true; //Split DEZ1
                 }
                 break;
-            case 17: //DEZ boss
+            case 23: //DEZ boss
                 vars.nextact = 0;
                 vars.nextzone = 12;
                 break;
@@ -254,7 +254,7 @@ split
         }
     }
     
-    if (!vars.dez2split && current.zone == 17 && current.act == 0) //detect fade to white on death egg 2
+    if (!vars.dez2split && current.zone == 23 && current.act == 0) //detect fade to white on death egg 2
     {
         if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
             (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
