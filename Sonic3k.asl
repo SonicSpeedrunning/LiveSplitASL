@@ -81,6 +81,7 @@ update
         vars.nextact = 1;
         vars.dez2split = false;
         vars.sszsplit = false;
+        vars.bonus = false;
     }
 }
 
