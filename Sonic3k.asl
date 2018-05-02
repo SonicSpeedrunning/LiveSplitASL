@@ -316,9 +316,11 @@ isLoading
             vars.stopwatch.Reset();
             return false;
         }
+        return;
     }
     else if ((old.timebonus == 0) && (current.timebonus != old.timebonus)) 
     {
         vars.bonus = true;
     }
+    return false;
 }
