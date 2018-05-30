@@ -64,6 +64,7 @@ init
     vars.nextzone = 0;
     vars.nextact = 1;
     vars.dez2split = false;
+    vars.ddzsplit = false;
     vars.sszsplit = false; //boss is defeated twice
 }
 
@@ -80,6 +81,7 @@ update
         vars.nextzone = 0;
         vars.nextact = 1;
         vars.dez2split = false;
+        vars.ddzsplit = false;
         vars.sszsplit = false;
         vars.bonus = false;
     }
@@ -268,8 +270,18 @@ split
     
     if (current.zone == 12 && current.ddzboss == 255 && old.ddzboss == 0) //Doomsday boss detect final hit
     {
-        print("Doomsday Zone Boss death detected");
-        split = true;
+        print("Doomsday Zone Boss death detected"); //need to detect fade to white, same as DEZ2End
+        vars.ddzsplit = true;
+    }
+    
+    if (vars.ddzsplit) //detect fade to white on doomsday
+    {
+        if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
+            (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
+        {
+            print("Doomsday White Screen detected");
+            split = true;
+        }
     }
     
 

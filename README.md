@@ -40,7 +40,6 @@ Splits on level load, final split is after the screen completely fades to white.
 
 Auto-starts on AIZ1 loaded and game started flag set.
 
-
 # Sonic CD 2011
 For Sonic CD 2011 (Steam)
 
@@ -59,3 +58,5 @@ Expects a split for every act. (Standard terminology, so 3 acts per zone)
 **Known Bug:** will split on completing a Special Stage, however as the special stages are not part of any known run I feel this is a non-issue.
 
 Currently no auto-start or auto-reset as previous implementation attempts were undesirable.
+
+(Timer may be getting reset on main menu, needs testing)
