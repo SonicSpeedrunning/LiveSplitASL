@@ -2,7 +2,7 @@
 Autosplits for LiveSplit
 
 # Sonic 2
-for Kega Fusion and RetroArch (Genesis Plus GX Core)
+for Kega Fusion and RetroArch (Genesis Plus GX Core) - Untested Sega Genesis Classics support
 
 RAM locations provided by the Sonic Retro wiki.
 
@@ -18,9 +18,8 @@ Splits when the timer is set to 0 without the life counter changing.
 
 Expects a split for every Act.
 
-
 # Sonic 3 & Knuckles
-For Kega Fusion, Gens Rerecording Project and RetroArch (Genesis Plus GX Core)
+For Kega Fusion, Gens Rerecording Project and RetroArch (Genesis Plus GX Core) - Untested Sega Genesis Classics support
 
 RAM locations provided by the Sonic Retro wiki.
 

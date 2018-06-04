@@ -43,6 +43,21 @@ state("retroarch")
     byte sszboss : "genesis_plus_gx_libretro.dll", 0xF39900, 0xB278;
 }
 
+state("SEGAGameRoom")
+{
+    short level :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4E;
+    byte zone   :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4F;
+    byte act    :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4E;
+    byte reset  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFFFC;
+    byte trigger  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C
+    short timebonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    short ringbonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D4;
+    byte chara  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF08;
+    ulong dez2end : "GenesisEmuWrapper.dll", 0xB677E8, 0xFC00;
+    byte ddzboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB1E4;
+    byte sszboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB278;
+}
+
 startup
 {
     settings.Add("actsplit", false, "Split on each Act");
