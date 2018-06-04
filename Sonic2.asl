@@ -15,8 +15,8 @@ state("gens")   //little endian
 	byte minutes : "gens.exe", 0x40F5C, 0xFE22;
 	byte lives   : "gens.exe", 0x40F5C, 0xFE13;
     byte continues : "gens.exe", 0x40F5C, 0xFE19;
-    byte zone : "gens.exe", 0x40F5C, 0xFE10;
-    byte act : "gens.exe", 0x40F5C, 0xFE11;
+    byte zone : "gens.exe", 0x40F5C, 0xFE11;
+    byte act : "gens.exe", 0x40F5C, 0xFE10;
     byte trigger  : "gens.exe", 0x40F5C, 0xF601; //new game is 8C, cutscene plays on 0x20
 }
 
@@ -26,8 +26,8 @@ state("retroarch")  //little endian
 	byte minutes : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE22;
 	byte lives   : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE13;
     byte continues : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE19;
-    byte zone : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE10;
-    byte act : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE11;
+    byte zone : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE11;
+    byte act : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE10;
     byte trigger  : "genesis_plus_gx_libretro.dll", 0xF39900, 0xF601; //new game is 8C, cutscene plays on 0x20
 }
 
@@ -47,7 +47,6 @@ update
         print("run start detected");
         
         current.totalTime = 0;
-        current.previousLives = 3;
     }
 }
 
@@ -59,15 +58,33 @@ reset
 init
 {
 	current.totalTime = 0;
-	current.previousLives = 3;
+    vars.actsplits = new bool[][]
+    {
+        new bool[] {true, true}, // 0 - Emerald Hill Zone
+        new bool[] {false, false}, // 1 - unused
+        new bool[] {false, false}, // 2 - unused
+        new bool[] {false, false}, // 3 - unused
+        new bool[] {true, true}, // 4 - Metropolis
+        new bool[] {true, false}, // 5
+        new bool[] {true, false},  // 6 - Wing Fortress
+        new bool[] {true, true}, // 7 - Hill Top
+        new bool[] {false, false}, // 8 - unused
+        new bool[] {false, false}, // 9 - unused
+        new bool[] {true, true}, // 10 - Oil Ocean
+        new bool[] {true, true}, // 11 - Mystic Cave
+        new bool[] {true, true}, // 12 - Casino Night
+        new bool[] {true, true}, // 13 - Chemical Plant
+        new bool[] {true, false}, // 14 - Death Egg
+        new bool[] {true, true}, // 15 - Aquatic Ruin
+        new bool[] {true, false}  // 16 - Sky Chase
+    };
 }
 
 split
 {
-	// Next level
-	if (current.seconds == 0 && current.minutes == 0 && (old.minutes*60 + old.seconds) > 0 && current.lives == current.previousLives) {
-		return true;
-	}
+    if ((current.act != old.act || current.zone != old.zone) &&
+        vars.actsplits[current.zone][current.act] && vars.actsplits[old.zone][old.act]) //act changed or zone changed, and both new and old levels are in the split list
+        return true;
     
     // Final split
     return current.trigger == 0x20;
@@ -75,11 +92,6 @@ split
 
 gameTime
 {
-	// Reset
-	if (current.lives == 0 && current.continues == 0) {
-		current.previousLives = 3;
-	}
-
     //main update
     if (
         (current.seconds == (old.seconds + 1)) && (current.minutes == old.minutes) || 
@@ -87,14 +99,6 @@ gameTime
        ) {
            current.totalTime++;
        }
-
-	// Update extra lives
-	if (current.lives > current.previousLives) {
-		current.previousLives = current.lives;
-	}
-    if (current.lives < current.previousLives && current.minutes == 0 && current.seconds == 1) {//update prevlives after death
-        current.previousLives = current.lives;
-	}
 
 	return TimeSpan.FromSeconds(current.totalTime);
 }
