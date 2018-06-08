@@ -7,6 +7,7 @@ state("Fusion")
     byte trigger  :   "Fusion.exe", 0x2A52D4, 0xF600; //new game is 8C
     short timebonus  :   "Fusion.exe", 0x2A52D4, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "Fusion.exe", 0x2A52D4, 0xF7D4;
+    short bonuscount :   "Fusion.exe", 0x2A52D4, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "Fusion.exe", 0x2A52D4, 0xFF09;
     ulong dez2end : "Fusion.exe", 0x2A52D4, 0xFC00;
     byte ddzboss : "Fusion.exe", 0x2A52D4, 0xB1E5;
@@ -22,6 +23,7 @@ state("gens")
     byte trigger  :   "gens.exe", 0x40F5C, 0xF601; //new game is 8C
     short timebonus  :   "gens.exe", 0x40F5C, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "gens.exe", 0x40F5C, 0xF7D4;
+    short bonuscount :   "gens.exe", 0x40F5C, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "gens.exe", 0x40F5C, 0xFF08;
     ulong dez2end : "gens.exe", 0x40F5C, 0xFC00;
     byte ddzboss : "gens.exe", 0x40F5C, 0xB1E4;
@@ -37,6 +39,7 @@ state("retroarch")
     byte trigger  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF601; //new game is 8C
     short timebonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D4;
+    short bonuscount :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFF08;
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0xF39900, 0xB1E4;
@@ -52,6 +55,7 @@ state("SEGAGameRoom")
     byte trigger  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C
     short timebonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D4;
+    short bonuscount :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF08;
     ulong dez2end : "GenesisEmuWrapper.dll", 0xB677E8, 0xFC00;
     byte ddzboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB1E4;
@@ -330,7 +334,7 @@ isLoading
 {
     if (vars.bonus)
     {
-        if ((current.timebonus < old.timebonus) || (current.ringbonus < old.ringbonus))
+        if (((current.timebonus < old.timebonus) || (current.ringbonus < old.ringbonus)) && old.bonuscount == 0)
         {
             if (!vars.stopwatch.IsRunning) vars.stopwatch.Start();
             return true;
@@ -345,7 +349,7 @@ isLoading
         }
         return;
     }
-    else if ((old.timebonus == 0) && (current.timebonus != old.timebonus)) 
+    else if ((old.timebonus == 0) && (current.timebonus != old.timebonus) && (current.bonuscount == 0))
     {
         vars.bonus = true;
     }
