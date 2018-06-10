@@ -14,12 +14,12 @@ Auto-starts when GHZ1 loads while not playing a demo.
 
 Auto-resets on running out of lives and continues.
 
-Splits when the timer is set to 0 without the life counter changing.
+Splits when the next act loads.
 
 Expects a split for every Act.
 
 # Sonic 3 & Knuckles
-For Kega Fusion, Gens Rerecording Project and RetroArch (Genesis Plus GX Core) - Untested Sega Genesis Classics support
+For Kega Fusion and RetroArch (Genesis Plus GX Core) - Untested Sega Genesis Classics support
 
 RAM locations provided by the Sonic Retro wiki.
 
@@ -59,3 +59,21 @@ Expects a split for every act. (Standard terminology, so 3 acts per zone)
 Currently no auto-start or auto-reset as previous implementation attempts were undesirable.
 
 (Timer may be getting reset on main menu, needs testing)
+
+# Sonic 1
+
+for Kega Fusion and RetroArch (Genesis Plus GX Core) - Untested Sega Genesis Classics support
+
+RAM locations provided by the Sonic Retro wiki.
+
+Uses https://github.com/tenebrae101/Sonic1AutoSplitter as a base, but uses "dumb logic": the timer is only interested in increasing seconds and doesn't care what the actual timer is. If the game's timer increases by a second, so does the autosplit timer - any other modification to the timer is ignored. This bypasses issues handling deaths, checkpoint respawns and a game over/continue state. Special case at the start of Final Zone handled - as SBZ3 doesn't end in a goalpost, the timer isn't paused between it and Final Zone, only the timer is reset when the HUD appears. A 3 second pause of the timer happens to keep sync.
+
+Final Split is when the ending cutscene loads.
+
+Auto-starts when GHZ1 loads while not playing a demo.
+
+Auto-resets on running out of lives and continues.
+
+Splits when the next act loads.
+
+Expects a split for every Act.
