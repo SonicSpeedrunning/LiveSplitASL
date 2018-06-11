@@ -42,6 +42,17 @@ state("SEGAGameRoom")  //little endian
     byte trigger  : "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C, cutscene plays on 0x20
 }
 
+state("SEGAGenesisClassics")  //little endian
+{
+	byte seconds : "SEGAGenesisClassics.exe", 0x71704, 0xFE25;
+	byte minutes : "SEGAGenesisClassics.exe", 0x71704, 0xFE22;
+	byte lives   : "SEGAGenesisClassics.exe", 0x71704, 0xFE13;
+    byte continues : "SEGAGenesisClassics.exe", 0x71704, 0xFE19;
+    byte zone : "SEGAGenesisClassics.exe", 0x71704, 0xFE11;
+    byte act : "SEGAGenesisClassics.exe", 0x71704, 0xFE10;
+    byte trigger  : "SEGAGenesisClassics.exe", 0x71704, 0xF601; //new game is 8C, cutscene plays on 0x20
+}
+
 start
 {
 	return (current.trigger == 0x8C && current.act == 0 && current.zone == 0);

@@ -62,6 +62,22 @@ state("SEGAGameRoom")
     byte sszboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB278;
 }
 
+state("SEGAGenesisClassics")
+{
+    short level :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4E;
+    byte zone   :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4F;
+    byte act    :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4E;
+    byte reset  :   "SEGAGenesisClassics.exe", 0x71704, 0xFFFC;
+    byte trigger  :   "SEGAGenesisClassics.exe", 0x71704, 0xF601; //new game is 8C
+    short timebonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    short ringbonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D4;
+    short bonuscount :   "SEGAGenesisClassics.exe", 0x71704, 0xFF8E; // reset to 0 at the start of a level bonus
+    byte chara  :   "SEGAGenesisClassics.exe", 0x71704, 0xFF08;
+    ulong dez2end : "SEGAGenesisClassics.exe", 0x71704, 0xFC00;
+    byte ddzboss : "SEGAGenesisClassics.exe", 0x71704, 0xB1E4;
+    byte sszboss : "SEGAGenesisClassics.exe", 0x71704, 0xB278;
+}
+
 startup
 {
     settings.Add("actsplit", false, "Split on each Act");
