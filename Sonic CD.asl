@@ -99,7 +99,7 @@ split
         }
             
         if (vars.boss == 1) { //good future
-            if (current.bhpGood == 0 && old.bhpGood == 1) { 
+            if (current.bhpGood == 0 && old.bhpGood == 1 && !(current.mins == 0 && current.seconds == 0)) { 
                 if (settings["debug"]) {
                     print("final split - boss death detected");
                 }
@@ -108,7 +108,7 @@ split
         }
             
         if (vars.boss == 2) { //bad future
-            if (current.bhpBad == 0 && old.bhpBad == 1) { 
+            if (current.bhpBad == 0 && old.bhpBad == 1 && !(current.mins == 0 && current.seconds == 0)) { 
                 if (settings["debug"]) {
                     print("final split - boss death detected");
                 }
