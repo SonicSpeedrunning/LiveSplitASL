@@ -32,19 +32,36 @@ state("gens")
 
 state("retroarch")
 {
-    short level :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEE4E;
-    byte zone   :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEE4F;
-    byte act    :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xEE4E;
-    byte reset  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFFFC;
-    byte trigger  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF601; //new game is 8C
-    short timebonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
-    short ringbonus  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xF7D4;
-    short bonuscount :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFF8E; // reset to 0 at the start of a level bonus
-    byte chara  :   "genesis_plus_gx_libretro.dll", 0xF39900, 0xFF08;
-    ulong dez2end : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFC00;
-    byte ddzboss : "genesis_plus_gx_libretro.dll", 0xF39900, 0xB1E4;
-    byte sszboss : "genesis_plus_gx_libretro.dll", 0xF39900, 0xB278;
+    short level :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4E;
+    byte zone   :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4F;
+    byte act    :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4E;
+    byte reset  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFFFC;
+    byte trigger  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF601; //new game is 8C
+    short timebonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    short ringbonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D4;
+    short bonuscount :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFF8E; // reset to 0 at the start of a level bonus
+    byte chara  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFF08;
+    ulong dez2end : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFC00;
+    byte ddzboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB1E4;
+    byte sszboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB278;
 }
+
+state("blastem")
+{
+    short level :   0x001FB410, 0x68, 0xEE4E;
+    byte zone   :   0x001FB410, 0x68, 0xEE4F;
+    byte act    :   0x001FB410, 0x68, 0xEE4E;
+    byte reset  :   0x001FB410, 0x68, 0xFFFC;
+    byte trigger  :   0x001FB410, 0x68, 0xF601; //new game is 8C
+    short timebonus  :   0x001FB410, 0x68, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    short ringbonus  :   0x001FB410, 0x68, 0xF7D4;
+    short bonuscount :   0x001FB410, 0x68, 0xFF8E; // reset to 0 at the start of a level bonus
+    byte chara  :   0x001FB410, 0x68, 0xFF08;
+    ulong dez2end : 0x001FB410, 0x68, 0xFC00;
+    byte ddzboss : 0x001FB410, 0x68, 0xB1E4;
+    byte sszboss : 0x001FB410, 0x68, 0xB278;
+}
+
 
 state("SEGAGameRoom")
 {
@@ -90,6 +107,25 @@ startup
     settings.SetToolTip("act_mg1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
     settings.SetToolTip("act_ic1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
     settings.SetToolTip("act_lb1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
+
+    settings.Add("deduct_ring", false, "Deduct ring bonus time as well as time bonus");
+    settings.SetToolTip("deduct_ring", "If checked the pause will last the duration of both time and ring bonuses  - not used for RTA-TB, which is time bonus only.");
+
+    Action<string> DebugOutput = (text) => {
+        print("[S3K Autosplitter] "+text);
+    };
+
+    Action<ExpandoObject> DebugOutputExpando = (ExpandoObject dynamicObject) => {
+            var dynamicDictionary = dynamicObject as IDictionary<string, object>;
+         
+            foreach(KeyValuePair<string, object> property in dynamicDictionary)
+            {
+                print(String.Format("[S3K Autosplitter] {0}: {1}", property.Key, property.Value.ToString()));
+            }
+            print("");
+    };
+    vars.DebugOutput = DebugOutput;
+    vars.DebugOutputExpando = DebugOutputExpando;
 }
 
 init
@@ -101,24 +137,29 @@ init
     vars.dez2split = false;
     vars.ddzsplit = false;
     vars.sszsplit = false; //boss is defeated twice
+
 }
 
 update
 {
     // Stores the curent phase the timer is in, so we can use the old one on the next frame.
+
 	current.timerPhase = timer.CurrentPhase;
-    
-    if ((old.timerPhase != current.timerPhase && old.timerPhase != TimerPhase.Paused) && current.timerPhase == TimerPhase.Running)
-    //pressed start run or autostarted run
-    {
-        print("run start detected");
-        
-        vars.nextzone = 0;
-        vars.nextact = 1;
-        vars.dez2split = false;
-        vars.ddzsplit = false;
-        vars.sszsplit = false;
-        vars.bonus = false;
+
+    //vars.DebugOutputExpando(current);
+    if(((IDictionary<String, object>)old).ContainsKey("timerPhase")) {
+        if ((old.timerPhase != current.timerPhase && old.timerPhase != TimerPhase.Paused) && current.timerPhase == TimerPhase.Running)
+        //pressed start run or autostarted run
+        {
+            vars.DebugOutput("run start detected");
+            
+            vars.nextzone = 0;
+            vars.nextact = 1;
+            vars.dez2split = false;
+            vars.ddzsplit = false;
+            vars.sszsplit = false;
+            vars.bonus = false;
+        }
     }
 }
 
@@ -126,7 +167,7 @@ start
 {
     if (current.trigger == 0x8C && current.act == 0 && current.zone == 0)
     {
-        print(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
+        vars.DebugOutput(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
         return true;
     }
 }
@@ -297,7 +338,7 @@ split
         if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
             (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
         {
-            print("DEZ2 Boss White Screen detected");
+            vars.DebugOutput("DEZ2 Boss White Screen detected");
             vars.dez2split = true;
             split = true;
         }
@@ -305,7 +346,7 @@ split
     
     if (current.zone == 12 && current.ddzboss == 255 && old.ddzboss == 0) //Doomsday boss detect final hit
     {
-        print("Doomsday Zone Boss death detected"); //need to detect fade to white, same as DEZ2End
+        vars.DebugOutput("Doomsday Zone Boss death detected"); //need to detect fade to white, same as DEZ2End
         vars.ddzsplit = true;
     }
     
@@ -314,7 +355,7 @@ split
         if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
             (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
         {
-            print("Doomsday White Screen detected");
+            vars.DebugOutput("Doomsday White Screen detected");
             split = true;
         }
     }
@@ -326,12 +367,12 @@ split
         {
             if (vars.sszsplit)
             {
-                print("Knuckles Final Boss death detected");
+                vars.DebugOutput("Knuckles Final Boss death detected");
                 split = true;
             }
             else
             {
-                print("Knuckles Final Boss 1st phase defeat detected");
+                vars.DebugOutput("Knuckles Final Boss 1st phase defeat detected");
                 vars.sszsplit = true;
             }
         }
@@ -339,9 +380,9 @@ split
     
     if (split)
     {
-        print(String.Format("old level: {0:X4} old zone: {1} old act: {2}", old.level, old.zone, old.act));
-        print(String.Format("level: {0:X4} zone: {1} act: {2}", current.level, current.zone, current.act));
-        print(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
+        vars.DebugOutput(String.Format("old level: {0:X4} old zone: {1} old act: {2}", old.level, old.zone, old.act));
+        vars.DebugOutput(String.Format("level: {0:X4} zone: {1} act: {2}", current.level, current.zone, current.act));
+        vars.DebugOutput(String.Format("next split on: zone: {0} act: {1}", vars.nextzone, vars.nextact));
         return true;
     }
 }
@@ -355,11 +396,11 @@ isLoading
             if (!vars.stopwatch.IsRunning) vars.stopwatch.Start();
             return true;
         }
-        else if ((current.timebonus == 0 && old.timebonus == 0) && (current.ringbonus == 0 && old.ringbonus == 0))
+        else if ((current.timebonus == 0 && old.timebonus == 0) && (settings["deduct_ring"] == false || (current.ringbonus == 0 && old.ringbonus == 0)))
         {
             vars.bonus = false;
             vars.stopwatch.Stop();
-            print("held timer for " + vars.stopwatch.ElapsedMilliseconds + " ms");
+            vars.DebugOutput("held timer for " + vars.stopwatch.ElapsedMilliseconds + " ms");
             vars.stopwatch.Reset();
             return false;
         }
