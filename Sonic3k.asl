@@ -103,8 +103,8 @@ state("SEGAGenesisClassics")
     ulong dez2end : "SEGAGenesisClassics.exe", 0x71704, 0xFC00;
     byte ddzboss : "SEGAGenesisClassics.exe", 0x71704, 0xB1E4;
     byte sszboss : "SEGAGenesisClassics.exe", 0x71704, 0xB278;
-    byte delactive : "GenesisEmuWrapper.dll", 0x71704, 0xEEE5;
-    byte onsaveselect : "GenesisEmuWrapper.dll", 0x71704, 0xFDB8;
+    byte delactive : "SEGAGenesisClassics.exe", 0x71704, 0xEEE5;
+    byte onsaveselect : "SEGAGenesisClassics.exe", 0x71704, 0xFDB8;
 }
 
 startup
