@@ -12,6 +12,8 @@ state("Fusion")
     ulong dez2end : "Fusion.exe", 0x2A52D4, 0xFC00;
     byte ddzboss : "Fusion.exe", 0x2A52D4, 0xB1E5;
     byte sszboss : "Fusion.exe", 0x2A52D4, 0xB279;
+    byte delactive : "Fusion.exe", 0x2A52D4, 0xEEE5;
+    byte onsaveselect : "Fusion.exe", 0x2A52D4, 0xFDB8;
 }
 
 state("gens")
@@ -28,6 +30,8 @@ state("gens")
     ulong dez2end : "gens.exe", 0x40F5C, 0xFC00;
     byte ddzboss : "gens.exe", 0x40F5C, 0xB1E4;
     byte sszboss : "gens.exe", 0x40F5C, 0xB278;
+    byte delactive : "gens.exe", 0x40F5C, 0xEEE5;
+    byte onsaveselect : "gens.exe", 0x40F5C, 0xFDB8;
 }
 
 state("retroarch")
@@ -44,6 +48,8 @@ state("retroarch")
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB1E4;
     byte sszboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB278;
+    byte delactive : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEEE5;
+    byte onsaveselect : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFDB8;
 }
 
 state("blastem")
@@ -60,6 +66,8 @@ state("blastem")
     ulong dez2end : 0x001FB410, 0x68, 0xFC00;
     byte ddzboss : 0x001FB410, 0x68, 0xB1E4;
     byte sszboss : 0x001FB410, 0x68, 0xB278;
+    byte delactive : 0x001FB410, 0x68, 0xEEE5;
+    byte onsaveselect : 0x001FB410, 0x68, 0xFDB8;
 }
 
 
@@ -77,6 +85,8 @@ state("SEGAGameRoom")
     ulong dez2end : "GenesisEmuWrapper.dll", 0xB677E8, 0xFC00;
     byte ddzboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB1E4;
     byte sszboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB278;
+    byte delactive : "GenesisEmuWrapper.dll", 0xB677E8, 0xEEE5;
+    byte onsaveselect : "GenesisEmuWrapper.dll", 0xB677E8, 0xFDB8;
 }
 
 state("SEGAGenesisClassics")
@@ -93,6 +103,8 @@ state("SEGAGenesisClassics")
     ulong dez2end : "SEGAGenesisClassics.exe", 0x71704, 0xFC00;
     byte ddzboss : "SEGAGenesisClassics.exe", 0x71704, 0xB1E4;
     byte sszboss : "SEGAGenesisClassics.exe", 0x71704, 0xB278;
+    byte delactive : "GenesisEmuWrapper.dll", 0x71704, 0xEEE5;
+    byte onsaveselect : "GenesisEmuWrapper.dll", 0x71704, 0xFDB8;
 }
 
 startup
@@ -144,7 +156,7 @@ update
 {
     // Stores the curent phase the timer is in, so we can use the old one on the next frame.
 
-	current.timerPhase = timer.CurrentPhase;
+    current.timerPhase = timer.CurrentPhase;
 
     //vars.DebugOutputExpando(current);
     if(((IDictionary<String, object>)old).ContainsKey("timerPhase")) {
@@ -174,7 +186,9 @@ start
 
 reset
 {
-    if (current.reset == 0 && old.reset != 0) //detecting memory checksum at end of RAM area being 0 - only changes if ROM is reloaded (Hard Reset)
+    // detecting memory checksum at end of RAM area being 0 - only changes if ROM is reloaded (Hard Reset)
+    // or if "DEL" is selected from the save file select menu.
+    if ( ( current.reset == 0 && old.reset != 0 ) || ( current.onsaveselect == 0xFF && current.delactive == 0xFF && old.delactive == 0 ) )  
     {
         return true;
     }
