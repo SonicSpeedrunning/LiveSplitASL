@@ -7,7 +7,6 @@ state("Fusion")
     byte trigger  :   "Fusion.exe", 0x2A52D4, 0xF600; //new game is 8C
     short timebonus  :   "Fusion.exe", 0x2A52D4, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "Fusion.exe", 0x2A52D4, 0xF7D4;
-    short bonuscount :   "Fusion.exe", 0x2A52D4, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "Fusion.exe", 0x2A52D4, 0xFF09;
     ulong dez2end : "Fusion.exe", 0x2A52D4, 0xFC00;
     byte ddzboss : "Fusion.exe", 0x2A52D4, 0xB1E5;
@@ -25,7 +24,6 @@ state("gens")
     byte trigger  :   "gens.exe", 0x40F5C, 0xF601; //new game is 8C
     short timebonus  :   "gens.exe", 0x40F5C, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "gens.exe", 0x40F5C, 0xF7D4;
-    short bonuscount :   "gens.exe", 0x40F5C, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "gens.exe", 0x40F5C, 0xFF08;
     ulong dez2end : "gens.exe", 0x40F5C, 0xFC00;
     byte ddzboss : "gens.exe", 0x40F5C, 0xB1E4;
@@ -43,7 +41,6 @@ state("retroarch")
     byte trigger  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF601; //new game is 8C
     short timebonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D4;
-    short bonuscount :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFF08;
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB1E4;
@@ -61,7 +58,6 @@ state("blastem")
     byte trigger  :   0x001FB410, 0x68, 0xF601; //new game is 8C
     short timebonus  :   0x001FB410, 0x68, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   0x001FB410, 0x68, 0xF7D4;
-    short bonuscount :   0x001FB410, 0x68, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   0x001FB410, 0x68, 0xFF08;
     ulong dez2end : 0x001FB410, 0x68, 0xFC00;
     byte ddzboss : 0x001FB410, 0x68, 0xB1E4;
@@ -80,7 +76,6 @@ state("SEGAGameRoom")
     byte trigger  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C
     short timebonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D4;
-    short bonuscount :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF08;
     ulong dez2end : "GenesisEmuWrapper.dll", 0xB677E8, 0xFC00;
     byte ddzboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB1E4;
@@ -98,7 +93,6 @@ state("SEGAGenesisClassics")
     byte trigger  :   "SEGAGenesisClassics.exe", 0x71704, 0xF601; //new game is 8C
     short timebonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     short ringbonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D4;
-    short bonuscount :   "SEGAGenesisClassics.exe", 0x71704, 0xFF8E; // reset to 0 at the start of a level bonus
     byte chara  :   "SEGAGenesisClassics.exe", 0x71704, 0xFF08;
     ulong dez2end : "SEGAGenesisClassics.exe", 0x71704, 0xFC00;
     byte ddzboss : "SEGAGenesisClassics.exe", 0x71704, 0xB1E4;
@@ -120,8 +114,6 @@ startup
     settings.SetToolTip("act_ic1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
     settings.SetToolTip("act_lb1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
 
-    settings.Add("deduct_ring", false, "Deduct ring bonus time as well as time bonus");
-    settings.SetToolTip("deduct_ring", "If checked the pause will last the duration of both time and ring bonuses  - not used for RTA-TB, which is time bonus only.");
 
     Action<string> DebugOutput = (text) => {
         print("[S3K Autosplitter] "+text);
@@ -241,16 +233,20 @@ split
                 }
                 break;
             case 5: //Icecap
-                vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
-                if (current.act == 1) //starting act 2
-                {
-                    vars.nextzone++; //if we just incremented next act past act 2 increment the zone
-                    if (settings["actsplit"] && !settings["act_ic1"]) split = true;
+                if (settings["actsplit"] && settings["act_ic1"]) {
+                    // We only have 1 split for Ice Cap, so we just wait until we get to Launch Base
+                    // Before splitting.
+                    // This would handle beating the boss, and also doing the boss skip.
+                    vars.nextzone++;
+                } else {
+                    vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
+                    if (current.act == 1) //starting act 2
+                    {
+                        vars.nextzone++; //if we just incremented next act past act 2 increment the zone
+                    }
+                    
                 }
-                else //starting act 1 of new zone
-                {
-                    split = true;
-                }
+                split = true;
                 break;
             case 6: //Launch Base
                 vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
@@ -403,26 +399,17 @@ split
 
 isLoading
 {
-    if (vars.bonus)
-    {
-        if (((current.timebonus < old.timebonus) || (current.ringbonus < old.ringbonus)) && old.bonuscount == 0)
-        {
-            if (!vars.stopwatch.IsRunning) vars.stopwatch.Start();
-            return true;
+    
+    if ( vars.bonus && current.timebonus == 0 ) {
+        // If we had a bonus, and the timebonus is now 0, reset it
+        vars.bonus = false;
+    } else if ( !vars.bonus && current.act <= 1 && current.timebonus < old.timebonus ) {
+        // if we haven't detected a bonus yet
+        // check that we are in an act (sanity check)
+        // then check to see if the current timebonus is less than the previous frame's one.
         }
-        else if ((current.timebonus == 0 && old.timebonus == 0) && (settings["deduct_ring"] == false || (current.ringbonus == 0 && old.ringbonus == 0)))
-        {
-            vars.bonus = false;
-            vars.stopwatch.Stop();
-            vars.DebugOutput("held timer for " + vars.stopwatch.ElapsedMilliseconds + " ms");
-            vars.stopwatch.Reset();
-            return false;
-        }
-        return;
-    }
-    else if ((old.timebonus == 0) && (current.timebonus != old.timebonus) && (current.bonuscount == 0))
-    {
         vars.bonus = true;
     }
-    return false;
+    return vars.bonus;
+
 }
