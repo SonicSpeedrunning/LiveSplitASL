@@ -425,7 +425,6 @@ isLoading
         // if we haven't detected a bonus yet
         // check that we are in an act (sanity check)
         // then check to see if the current timebonus is less than the previous frame's one.
-        }
         vars.bonus = true;
     }
     return vars.bonus;
