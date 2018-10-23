@@ -6,6 +6,7 @@ state("Fusion")
     byte reset  :   "Fusion.exe", 0x2A52D4, 0xFFFC;
     byte trigger  :   "Fusion.exe", 0x2A52D4, 0xF600; //new game is 8C
     ushort timebonus  :   "Fusion.exe", 0x2A52D4, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   "Fusion.exe", 0x2A52D4, 0xFE28;
     byte chara  :   "Fusion.exe", 0x2A52D4, 0xFF09;
     ulong dez2end : "Fusion.exe", 0x2A52D4, 0xFC00;
     byte ddzboss : "Fusion.exe", 0x2A52D4, 0xB1E5;
@@ -22,6 +23,7 @@ state("gens")
     byte reset  :   "gens.exe", 0x40F5C, 0xFFFC;
     byte trigger  :   "gens.exe", 0x40F5C, 0xF601; //new game is 8C
     ushort timebonus  :   "gens.exe", 0x40F5C, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   "gens.exe", 0x40F5C, 0xFE28;
     byte chara  :   "gens.exe", 0x40F5C, 0xFF08;
     ulong dez2end : "gens.exe", 0x40F5C, 0xFC00;
     byte ddzboss : "gens.exe", 0x40F5C, 0xB1E4;
@@ -37,6 +39,7 @@ state("retroarch", "32bit")
     byte reset  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFFFC;
     byte trigger  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF601; //new game is 8C
     ushort timebonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE28;
     byte chara  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFF08;
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB1E4;
@@ -53,6 +56,7 @@ state("retroarch", "64bit")
     byte reset  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFFFC;
     byte trigger  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF601; //new game is 8C
     ushort timebonus  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE28;
     byte chara  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFF08;
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xB1E4;
@@ -69,6 +73,7 @@ state("blastem")
     byte reset  :   0x001FB410, 0x68, 0xFFFC;
     byte trigger  :   0x001FB410, 0x68, 0xF601; //new game is 8C
     ushort timebonus  :   0x001FB410, 0x68, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   0x001FB410, 0x68, 0xFE28;
     byte chara  :   0x001FB410, 0x68, 0xFF08;
     ulong dez2end : 0x001FB410, 0x68, 0xFC00;
     byte ddzboss : 0x001FB410, 0x68, 0xB1E4;
@@ -86,6 +91,7 @@ state("SEGAGameRoom")
     byte reset  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFFFC;
     byte trigger  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C
     ushort timebonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFE28;
     byte chara  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF08;
     ulong dez2end : "GenesisEmuWrapper.dll", 0xB677E8, 0xFC00;
     byte ddzboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB1E4;
@@ -102,6 +108,7 @@ state("SEGAGenesisClassics")
     byte reset  :   "SEGAGenesisClassics.exe", 0x71704, 0xFFFC;
     byte trigger  :   "SEGAGenesisClassics.exe", 0x71704, 0xF601; //new game is 8C
     ushort timebonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort scoretally  :   "SEGAGenesisClassics.exe", 0x71704, 0xFE28;
     byte chara  :   "SEGAGenesisClassics.exe", 0x71704, 0xFF08;
     ulong dez2end : "SEGAGenesisClassics.exe", 0x71704, 0xFC00;
     byte ddzboss : "SEGAGenesisClassics.exe", 0x71704, 0xB1E4;
@@ -426,7 +433,7 @@ isLoading
     if ( vars.bonus && current.timebonus == 0 ) {
         // If we had a bonus, and the timebonus is now 0, reset it
         vars.bonus = false;
-    } else if ( !vars.bonus && current.act <= 1 && current.timebonus < old.timebonus ) {
+    } else if ( !vars.bonus && current.act <= 1 && current.timebonus < old.timebonus && current.scoretally > old.scoretally ) {
         // if we haven't detected a bonus yet
         // check that we are in an act (sanity check)
         // then check to see if the current timebonus is less than the previous frame's one.
