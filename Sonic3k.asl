@@ -1,11 +1,11 @@
 state("Fusion")
 {
-    short level :   "Fusion.exe", 0x2A52D4, 0xEE4E;
+    ushort level :   "Fusion.exe", 0x2A52D4, 0xEE4E;
     byte zone   :   "Fusion.exe", 0x2A52D4, 0xEE4E;
     byte act    :   "Fusion.exe", 0x2A52D4, 0xEE4F;
     byte reset  :   "Fusion.exe", 0x2A52D4, 0xFFFC;
     byte trigger  :   "Fusion.exe", 0x2A52D4, 0xF600; //new game is 8C
-    short timebonus  :   "Fusion.exe", 0x2A52D4, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   "Fusion.exe", 0x2A52D4, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   "Fusion.exe", 0x2A52D4, 0xFF09;
     ulong dez2end : "Fusion.exe", 0x2A52D4, 0xFC00;
     byte ddzboss : "Fusion.exe", 0x2A52D4, 0xB1E5;
@@ -16,12 +16,12 @@ state("Fusion")
 
 state("gens")
 {
-    short level :   "gens.exe", 0x40F5C, 0xEE4E;
+    ushort level :   "gens.exe", 0x40F5C, 0xEE4E;
     byte zone   :   "gens.exe", 0x40F5C, 0xEE4F;
     byte act    :   "gens.exe", 0x40F5C, 0xEE4E;
     byte reset  :   "gens.exe", 0x40F5C, 0xFFFC;
     byte trigger  :   "gens.exe", 0x40F5C, 0xF601; //new game is 8C
-    short timebonus  :   "gens.exe", 0x40F5C, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   "gens.exe", 0x40F5C, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   "gens.exe", 0x40F5C, 0xFF08;
     ulong dez2end : "gens.exe", 0x40F5C, 0xFC00;
     byte ddzboss : "gens.exe", 0x40F5C, 0xB1E4;
@@ -31,12 +31,12 @@ state("gens")
 }
 state("retroarch", "32bit")
 {
-    short level :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4E;
+    ushort level :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4E;
     byte zone   :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4F;
     byte act    :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xEE4E;
     byte reset  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFFFC;
     byte trigger  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF601; //new game is 8C
-    short timebonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFF08;
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xB1E4;
@@ -47,12 +47,12 @@ state("retroarch", "32bit")
 
 state("retroarch", "64bit")
 {
-    short level :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xEE4E;
+    ushort level :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xEE4E;
     byte zone   :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xEE4F;
     byte act    :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xEE4E;
     byte reset  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFFFC;
     byte trigger  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF601; //new game is 8C
-    short timebonus  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFF08;
     ulong dez2end : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFC00;
     byte ddzboss : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xB1E4;
@@ -63,12 +63,12 @@ state("retroarch", "64bit")
 
 state("blastem")
 {
-    short level :   0x001FB410, 0x68, 0xEE4E;
+    ushort level :   0x001FB410, 0x68, 0xEE4E;
     byte zone   :   0x001FB410, 0x68, 0xEE4F;
     byte act    :   0x001FB410, 0x68, 0xEE4E;
     byte reset  :   0x001FB410, 0x68, 0xFFFC;
     byte trigger  :   0x001FB410, 0x68, 0xF601; //new game is 8C
-    short timebonus  :   0x001FB410, 0x68, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   0x001FB410, 0x68, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   0x001FB410, 0x68, 0xFF08;
     ulong dez2end : 0x001FB410, 0x68, 0xFC00;
     byte ddzboss : 0x001FB410, 0x68, 0xB1E4;
@@ -80,12 +80,12 @@ state("blastem")
 
 state("SEGAGameRoom")
 {
-    short level :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4E;
+    ushort level :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4E;
     byte zone   :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4F;
     byte act    :   "GenesisEmuWrapper.dll", 0xB677E8, 0xEE4E;
     byte reset  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFFFC;
     byte trigger  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C
-    short timebonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   "GenesisEmuWrapper.dll", 0xB677E8, 0xFF08;
     ulong dez2end : "GenesisEmuWrapper.dll", 0xB677E8, 0xFC00;
     byte ddzboss : "GenesisEmuWrapper.dll", 0xB677E8, 0xB1E4;
@@ -96,12 +96,12 @@ state("SEGAGameRoom")
 
 state("SEGAGenesisClassics")
 {
-    short level :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4E;
+    ushort level :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4E;
     byte zone   :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4F;
     byte act    :   "SEGAGenesisClassics.exe", 0x71704, 0xEE4E;
     byte reset  :   "SEGAGenesisClassics.exe", 0x71704, 0xFFFC;
     byte trigger  :   "SEGAGenesisClassics.exe", 0x71704, 0xF601; //new game is 8C
-    short timebonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
+    ushort timebonus  :   "SEGAGenesisClassics.exe", 0x71704, 0xF7D2; //Bonus - 1st byte counts down in 10s (0A Hex), 2nd byte is how many times to loop the first from FF to 00
     byte chara  :   "SEGAGenesisClassics.exe", 0x71704, 0xFF08;
     ulong dez2end : "SEGAGenesisClassics.exe", 0x71704, 0xFC00;
     byte ddzboss : "SEGAGenesisClassics.exe", 0x71704, 0xB1E4;
@@ -150,6 +150,8 @@ init
     vars.dez2split = false;
     vars.ddzsplit = false;
     vars.sszsplit = false; //boss is defeated twice
+
+    vars.processingzone = false;
 
     if ( game.ProcessName == "retroarch" ) {
         if ( game.Is64Bit() ) {
@@ -207,8 +209,10 @@ reset
 split
 {
     bool split = false;
-    if (current.zone == vars.nextzone && current.act == vars.nextact)
+
+    if (!vars.processingzone && current.zone == vars.nextzone && current.act == vars.nextact)
     {
+        vars.processingzone = true;
         switch((int)current.zone) //current zone is the zone now loading
         {
             //next act will be same zone, act increment, next zone will be current zone + 1 act 0
@@ -359,6 +363,7 @@ split
             case 12: //Doomsday
                 break; //We have already split for DE2 by detecting the whiteout
         }
+        vars.processingzone = false;
     }
     
     if (!vars.dez2split && current.zone == 23 && current.act == 0) //detect fade to white on death egg 2
@@ -425,6 +430,7 @@ isLoading
         // if we haven't detected a bonus yet
         // check that we are in an act (sanity check)
         // then check to see if the current timebonus is less than the previous frame's one.
+        vars.DebugOutput(String.Format("Detected Bonus decrease: {0} from: {1}", current.timebonus, old.timebonus));
         vars.bonus = true;
     }
     return vars.bonus;
