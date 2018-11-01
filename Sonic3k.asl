@@ -338,17 +338,12 @@ split
                 break;
             case 10: //Sky Sanctuary
                 split = true;   //split HPZ
-                switch ((int)current.chara)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                        vars.nextzone = 11; //DEZ
-                        vars.nextact = 0;
-                        break;
-                    case 3:
-                        break;
-                }
+
+                vars.nextzone = 11; //DEZ
+                vars.nextact = 0;
+                // We treat knux in the same way 
+                // otherwise we double split when entering SS as it's still checking for the next zone
+
                 break;
             case 11: //DEZ
                 if (current.act == 0) //loading DEZ
@@ -390,12 +385,12 @@ split
         vars.ddzsplit = true;
     }
     
-    if (vars.ddzsplit) //detect fade to white on doomsday
+    if (vars.ddzsplit || vars.sszsplit) //detect fade to white on doomsday
     {
         if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
             (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
         {
-            vars.DebugOutput("Doomsday White Screen detected");
+            vars.DebugOutput("Doomsday/SS White Screen detected");
             split = true;
         }
     }
@@ -405,16 +400,8 @@ split
     {
         if (current.sszboss == 0 && old.sszboss == 1)
         {
-            if (vars.sszsplit)
-            {
-                vars.DebugOutput("Knuckles Final Boss death detected");
-                split = true;
-            }
-            else
-            {
-                vars.DebugOutput("Knuckles Final Boss 1st phase defeat detected");
-                vars.sszsplit = true;
-            }
+            vars.DebugOutput("Knuckles Final Boss 1st phase defeat detected");
+            vars.sszsplit = true;
         }
     }
     
