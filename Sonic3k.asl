@@ -269,7 +269,7 @@ split
     bool split = false;
 
     const byte ACT_1 = 0;
-    const byte ACT_2 = 2;
+    const byte ACT_2 = 1;
 
     const byte SONIC_AND_TAILS = 0;
     const byte SONIC = 1;
