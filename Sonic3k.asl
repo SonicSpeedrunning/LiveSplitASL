@@ -59,6 +59,8 @@ state("retroarch", "32bit")
     byte savefilezone : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFDEA;
     ushort waterlevel : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF647;
     byte centiseconds : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE24;
+
+    byte2 time : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE22;
 }
 
 state("retroarch", "64bit")
@@ -80,6 +82,7 @@ state("retroarch", "64bit")
     byte savefilezone : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFDEA;
     ushort waterlevel : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF647;
     byte centiseconds : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE24;
+
 }
 
 state("blastem")
@@ -270,6 +273,7 @@ split
 
     const byte ACT_1 = 0;
     const byte ACT_2 = 1;
+    const byte ACT_3 = 2;
 
     const byte SONIC_AND_TAILS = 0;
     const byte SONIC = 1;
@@ -322,38 +326,51 @@ split
         );
     }
 
-    if (!vars.processingzone && current.zone != DOOMSDAY && current.zone == vars.nextzone && current.act == vars.nextact)
-    {
+    if (
+        !vars.processingzone && 
+        current.zone != DOOMSDAY && 
+        /* Make doubly sure we are in the correct zone */
+        current.zone == vars.nextzone && old.zone == vars.nextzone
+        current.act == vars.nextact && old.act == vars.nextact 
+    ) {
         vars.processingzone = true;
-        vars.nextact = 1 - vars.nextact; //1-1 is 0, 1-0 is 1 - toggles between act 1 and 2
-        if (current.act == ACT_2) //starting act 2
-        {
-            vars.nextzone = vars.nextzonemap[current.zone]; //if we just incremented next act past act 2 increment the zone
-            if ( current.zone == LAVA_REEF || ( current.zone == LRB_HIDDEN_PALACE && current.chara == KNUCKLES ) ) {
-                // LR2 -> HP = 22-1 and HP -> SS2 for Knux
-                vars.nextact = ACT_2; 
-            } 
-            if (!vars.skipsAct1Split || current.zone == LRB_HIDDEN_PALACE) split = true;
-        }
-        else //starting act 1 of new zone
-        {
-            if ( 
-                // Handle IC boss skip
-                ( current.zone == ICE_CAP && vars.skipsAct1Split ) ||
-                ( current.zone == SKY_SANCTUARY ) ||
-                ( current.zone == LRB_HIDDEN_PALACE )
-            ) {  
+        
+
+        switch ( (int)current.act ) {
+            // This is AFTER a level change.
+            case ACT_1:
+                vars.nextact = ACT_2;
+                if ( 
+                    // Handle IC boss skip and single act zones.
+                    ( current.zone == ICE_CAP && vars.skipsAct1Split ) ||
+                    ( current.zone == SKY_SANCTUARY ) ||
+                    ( current.zone == LRB_HIDDEN_PALACE )
+                ) {  
+                    vars.nextzone = vars.nextzonemap[current.zone];
+                    vars.nextact = ACT_1;
+                }
+                split = ( current.zone < LRB_HIDDEN_PALACE );
+                break;
+            case ACT_2:
+                // next split is generally Act 1 of next zone
                 vars.nextzone = vars.nextzonemap[current.zone];
                 vars.nextact = ACT_1;
-            }
-            if ( current.zone < LRB_HIDDEN_PALACE ) {
-                split = true;
-            }
+                if ( current.zone == LAVA_REEF || 
+                    ( current.zone == LRB_HIDDEN_PALACE && current.chara == KNUCKLES ) 
+                ) {
+                    // LR2 -> HP = 22-1 and HP -> SS2 for Knux
+                    vars.nextact = ACT_2; 
+                }
+                // If we're not skipping the act 1 split, or we entered Hidden Palace
+                split = ( !vars.skipsAct1Split || current.zone == LRB_HIDDEN_PALACE );
+
+                break;
         }
+
         vars.processingzone = false;
     }
     
-    if (!vars.dez2split && current.zone == DEATH_EGG_BOSS && current.act == 0) //detect fade to white on death egg 2
+    if (!vars.dez2split && current.zone == DEATH_EGG_BOSS && current.act == ACT_1) //detect fade to white on death egg 2
     {
         if ((current.dez2end == 0xEE0EEE0EEE0EEE0E && old.dez2end == 0xEE0EEE0EEE0EEE0E) ||
             (current.dez2end == 0x0EEE0EEE0EEE0EEE && old.dez2end == 0x0EEE0EEE0EEE0EEE))
