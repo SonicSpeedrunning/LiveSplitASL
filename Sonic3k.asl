@@ -59,6 +59,7 @@ init
     vars.savefile = 255;
     vars.processingzone = false;
     vars.skipsAct1Split = false;
+    vars.gameshortname = "";
     if ( game.ProcessName == "retroarch" ) {
         if ( game.Is64Bit() ) {
             version = "64bit";
@@ -79,8 +80,6 @@ init
             long gpgxOffset = 0x01AF84;
             if ( game.Is64Bit() ) {
                 gpgxOffset = 0x24A3D0;
-            } else {
-                
             }
             baseAddress = modules.Where(m => m.ModuleName == "genesis_plus_gx_libretro.dll").First().BaseAddress;
             genOffset = gpgxOffset;
@@ -89,7 +88,6 @@ init
             genOffset = 0x40F5C;
             break;
         case "fusion":
-            baseAddress = modules.Where(m => m.ModuleName == "Fusion.exe").First().BaseAddress;
             genOffset = 0x2A52D4;
             isBigEndian = true;
             break;
@@ -125,6 +123,18 @@ init
         new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0xFE25 : 0xFE24 ) ) { Name = "centiseconds" },
     };
     vars.isBigEndian = isBigEndian;
+    string gamename = memory.ReadString(IntPtr.Add((IntPtr)memoryOffset, (int)0xFFFC ),4);
+    
+
+    switch (gamename) {
+        case "SM&K": // Big-E
+        case "MSK&": // Little-E
+            vars.gameshortname = "S3K";
+            vars.DebugOutput("S3K Loaded");
+            break;
+        default:
+            throw new NullReferenceException (String.Format("Game {0} not supported.", gamename ));
+    }
 }
 
 update
