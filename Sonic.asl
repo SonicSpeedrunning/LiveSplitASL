@@ -20,15 +20,26 @@ state("gens")   //little endian
     byte trigger  : "gens.exe", 0x40F5C, 0xF601; //new game is 8C, cutscene plays on 0x20
 }
 
-state("retroarch")  //little endian
+state("retroarch", "32bit")  //little endian
 {
-	byte seconds : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE25;
-	byte minutes : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE22;
-	byte lives   : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE13;
-    byte continues : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE19;
-    byte zone : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE11;
-    byte act : "genesis_plus_gx_libretro.dll", 0xF39900, 0xFE10;
-    byte trigger  : "genesis_plus_gx_libretro.dll", 0xF39900, 0xF601; //new game is 8C, cutscene plays on 0x20
+	byte seconds : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE25;
+	byte minutes : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE22;
+	byte lives   : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE13;
+    byte continues : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE19;
+    byte zone : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE11;
+    byte act : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE10;
+    byte trigger  : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF601; //new game is 8C, cutscene plays on 0x20
+}
+
+state("retroarch", "64bit")  //little endian
+{
+    byte seconds : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE25;
+    byte minutes : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE22;
+    byte lives   : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE13;
+    byte continues : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE19;
+    byte zone : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE11;
+    byte act : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE10;
+    byte trigger  : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF601; //new game is 8C, cutscene plays on 0x20
 }
 
 state("SEGAGameRoom")  //little endian
@@ -91,6 +102,13 @@ init
         new bool[] {true, true, true}, // 4 - Spring Yard Zone
         new bool[] {true, true, true} // 5 - Scrap Brain Zone
     };
+    if ( game.ProcessName == "retroarch" ) {
+        if ( game.Is64Bit() ) {
+            version = "64bit";
+        } else {
+            version = "32bit";
+        }
+    }
 }
 
 split
