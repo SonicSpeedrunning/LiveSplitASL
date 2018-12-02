@@ -15,11 +15,14 @@ startup
     settings.Add("act_mg1", false, "Ignore Marble Garden 1", "actsplit");
     settings.Add("act_ic1", false, "Ignore Ice Cap 1", "actsplit");
     settings.Add("act_lb1", false, "Ignore Launch Base 1", "actsplit");
+
+    settings.Add("hard_reset", true, "Reset timer on Hard Reset?");
     
     settings.SetToolTip("act_mg1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
     settings.SetToolTip("act_ic1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
     settings.SetToolTip("act_lb1", "If checked, will not split the end of the first Act. Use if you have per act splits generally but not for this zone.");
 
+    settings.SetToolTip("hard_reset", "If checked, a hard reset will reset the timer.");
 
     Action<string> DebugOutput = (text) => {
         print("[S3K Autosplitter] "+text);
@@ -190,7 +193,7 @@ reset
     // detecting memory checksum at end of RAM area being 0 - only changes if ROM is reloaded (Hard Reset)
     // or if "DEL" is selected from the save file select menu.
     if ( 
-        ( vars.watchers["reset"].Current == 0 && vars.watchers["reset"].Old != 0 ) || 
+        ( settings["hard_reset"] && vars.watchers["reset"].Current == 0 && vars.watchers["reset"].Old != 0 ) || 
         ( current.inMenu == true
             && ( 
                 ( vars.watchers["savefile"].Current == 9 && vars.watchers["delactive"].Current == 0xFF && vars.watchers["delactive"].Old == 0 ) ||
