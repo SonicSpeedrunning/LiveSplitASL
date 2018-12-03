@@ -7,6 +7,7 @@ state("Fusion") //converts to big-endian
     byte zone   : "Fusion.exe", 0x2A52D4, 0xFE10;
     byte act    : "Fusion.exe", 0x2A52D4, 0xFE11;
     byte trigger  : "Fusion.exe", 0x2A52D4, 0xF600; //new game is 8C, cutscene plays on 0x20
+    ushort levelframecount : "Fusion.exe", 0x2A52D4, 0xFE04;
 }
 
 state("gens")   //little endian
@@ -18,6 +19,7 @@ state("gens")   //little endian
     byte zone : "gens.exe", 0x40F5C, 0xFE11;
     byte act : "gens.exe", 0x40F5C, 0xFE10;
     byte trigger  : "gens.exe", 0x40F5C, 0xF601; //new game is 8C, cutscene plays on 0x20
+    ushort levelframecount : "gens.exe", 0x40F5C, 0xFE04;
 }
 
 state("retroarch", "32bit")  //little endian
@@ -29,6 +31,7 @@ state("retroarch", "32bit")  //little endian
     byte zone : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE11;
     byte act : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE10;
     byte trigger  : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xF601; //new game is 8C, cutscene plays on 0x20
+    ushort levelframecount : "genesis_plus_gx_libretro.dll", 0x01AF84, 0xFE04;
 }
 
 state("retroarch", "64bit")  //little endian
@@ -40,6 +43,7 @@ state("retroarch", "64bit")  //little endian
     byte zone : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE11;
     byte act : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE10;
     byte trigger  : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xF601; //new game is 8C, cutscene plays on 0x20
+    ushort levelframecount : "genesis_plus_gx_libretro.dll", 0x24A3D0, 0xFE04;
 }
 
 state("SEGAGameRoom")  //little endian
@@ -51,6 +55,7 @@ state("SEGAGameRoom")  //little endian
     byte zone : "GenesisEmuWrapper.dll", 0xB677E8, 0xFE11;
     byte act : "GenesisEmuWrapper.dll", 0xB677E8, 0xFE10;
     byte trigger  : "GenesisEmuWrapper.dll", 0xB677E8, 0xF601; //new game is 8C, cutscene plays on 0x20
+    ushort levelframecount : "GenesisEmuWrapper.dll", 0xB677E8, 0xFE04;
 }
 
 state("SEGAGenesisClassics")  //little endian
@@ -62,6 +67,7 @@ state("SEGAGenesisClassics")  //little endian
     byte zone : "SEGAGenesisClassics.exe", 0x71704, 0xFE11;
     byte act : "SEGAGenesisClassics.exe", 0x71704, 0xFE10;
     byte trigger  : "SEGAGenesisClassics.exe", 0x71704, 0xF601; //new game is 8C, cutscene plays on 0x20
+    ushort levelframecount : "SEGAGenesisClassics.exe", 0x71704, 0xFE04;
 }
 
 start
@@ -80,7 +86,7 @@ update
         print("run start detected");
         
         current.totalTime = 0;
-        vars.pause = false;
+        vars.pause = true;
     }
 }
 
@@ -137,7 +143,7 @@ gameTime
             current.totalTime++;
         }
     }
-    else if (current.seconds == 0 && current.minutes == 0) vars.pause = false; //unpause timer once game time has reset
+    else if (current.levelframecount == 0 && current.seconds == 0 && current.minutes == 0) vars.pause = false; //unpause timer once game time has reset
 	return TimeSpan.FromSeconds(current.totalTime);
 }
 
