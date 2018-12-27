@@ -30,7 +30,7 @@ startup
     vars.SwapEndianness = SwapEndianness;
     vars.DebugOutput = DebugOutput;
     vars.DebugOutputExpando = DebugOutputExpando;
-    vars.gameactive = true;
+    vars.igttotal = 0;
     refreshRate = 60;
 }
 
@@ -76,16 +76,18 @@ init
             break;
 
     }
+
+    //vars.DebugOutput("name: " + timer.Run.GameName);
     memoryOffset = memory.ReadValue<int>(IntPtr.Add(baseAddress, (int)genOffset) );
 
     vars.watchers = new MemoryWatcherList
     {
         new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0x067F : 0x067E ) ) { Name = "level" },
-        new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0xF749 : 0xF749 ) ) { Name = "ingame" },
+        new MemoryWatcher<byte>(  (IntPtr)memoryOffset +  0xF749                           ) { Name = "ingame" },
         new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0xD189 : 0xD188 ) ) { Name = "ppboss" },
-        new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0x0BA9 : 0x0BA9 ) ) { Name = "ffboss" },
-        new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0x06A3 : 0x06A3 ) ) { Name = "emeralds" },
-        new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0xF770 : 0xF770 ) ) { Name = "active" },
+        new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0x0BA9 : 0x0BA8 ) ) { Name = "ffboss" },
+        new MemoryWatcher<byte>(  (IntPtr)memoryOffset + ( isBigEndian ? 0x06A3 : 0x06A2 ) ) { Name = "emeralds" },
+        new MemoryWatcher<ushort>(  (IntPtr)memoryOffset + 0x0A5C                          ) { Name = "levelframecount" },
 
     };
     vars.isBigEndian = isBigEndian;
@@ -95,7 +97,20 @@ init
 update
 {
     vars.watchers.UpdateAll(game);
-    
+
+
+    if(!((IDictionary<String, object>)old).ContainsKey("igt")) {
+        old.igt = vars.watchers["levelframecount"].Old;
+    }
+    var lfc = vars.watchers["levelframecount"].Current;
+    if ( vars.isBigEndian ) {
+        lfc = vars.SwapEndianness(lfc);
+    }
+    current.igt = Math.Floor(Convert.ToDouble(lfc / 60) );
+
+    if ( current.igt == old.igt + 1) {
+        vars.igttotal++;
+    }
     current.timerPhase = timer.CurrentPhase;
 
     if(((IDictionary<String, object>)old).ContainsKey("timerPhase")) {
@@ -103,6 +118,7 @@ update
         //pressed start run or autostarted run
         {
             vars.DebugOutput("run start detected");
+            vars.igttotal = 0;
         }
     }
 
@@ -142,3 +158,12 @@ split
     );
 }
 
+isLoading
+{
+    return true;
+}
+
+gameTime
+{
+    return TimeSpan.FromSeconds(vars.igttotal);
+}
