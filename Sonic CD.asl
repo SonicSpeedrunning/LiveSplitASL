@@ -29,6 +29,7 @@ init
             vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xFC5810) { Name = "TimerIsRunning" });
             vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC40EB8) { Name = "bhpGood" });
             vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC40EFC) { Name = "bhpBad" });
+            vars.watchers.Add(new MemoryWatcher<int>(modules.First().BaseAddress + 0xC3DEFC) { Name = "TimeBonus" });
             break;
 
         case "rsdkv3_64":
@@ -42,6 +43,7 @@ init
             vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xAC0B8) { Name = "TimerIsRunning" });
             vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7BCC10) { Name = "bhpGood" });
             vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7BCC54) { Name = "bhpBad" });
+            vars.watchers.Add(new MemoryWatcher<int>(modules.First().BaseAddress + 0x7B9C54) { Name = "TimeBonus" });
             break;
 
         case "rsdkv3":
@@ -55,12 +57,14 @@ init
             vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0x88090) { Name = "TimerIsRunning" });
             vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x791990) { Name = "bhpGood" });
             vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7919D4) { Name = "bhpBad" });
+            vars.watchers.Add(new MemoryWatcher<int>(modules.First().BaseAddress + 0x78E9D4) { Name = "TimeBonus" });
+
         break;
     }
 
     // Placeholder for current status variables the script needs. Prevents LiveSplit from throwing exceptions
     current.IGT = 0d;
-    current.Act = 0;
+    current.Act = 0xFF;
     current.FinalBossHp = 0xFF;
 }
 
@@ -69,6 +73,8 @@ startup
     // Basic settings
     settings.Add("centisecsBug", false, "Remove centiseconds from the timer when starting a new run");
     settings.SetToolTip("centisecsBug", "Partial mitigation of the centiseconds bug on the steam release of Sonic CD (2011).\nIf enabled, LiveSplit will automatizally set the centiseconds to 0 at the start of a new run.\nThis setting has no effect on ther releases of the game.");
+    settings.Add("RTA-TB", false, "Use All Time Stones timing rules");
+    settings.SetToolTip("RTA-TB", "If enabled, LiveSplit's behaviour will be changed in order to reflect the different\ntiming rules used in the \"All Time Stones\" category:\n• RTA-TB (Time Bonus) will be used as Game Time instead of IGT\n• The final split will occur after the screen fades to white in Metallic Madness 3");
     settings.Add("autosplitting", true, "Autosplitting");
 
     string[][] actsName = {
@@ -95,24 +101,34 @@ startup
         new string[] { "Metallic Madness Act 3", "Metallic Madness Act 3 - Bad Future" }
     };
     vars.Acts = new Dictionary<byte, byte>();
-    byte z = 0; for (byte i = 0; i < actsName.Length; i++) { for (byte j = 0; j < actsName[i].Length; j++) vars.Acts.Add(z++, i); }
-    for (byte i = 0; i < actsName.Length; i++) settings.Add(i.ToString(), true, actsName[i][0], "autosplitting");
+    byte z = 0;
+    for (byte i = 0; i < actsName.Length; i++)
+    {
+        for (byte j = 0; j < actsName[i].Length; j++)
+            vars.Acts.Add(z++, i);
+        settings.Add(i.ToString(), true, actsName[i][0], "autosplitting");
+    }
 
     // ZoneIndicator - dummy name for a variable that essentially tells us whether we are playing or in one of the menus
     // Used to ignore act changes outside actual gameplay
     vars.ZoneIndicator = new Dictionary<string, uint>
     {
         { "Special Stage", 0x43455053u },
-        { "Title Screen", 0x4C544954u },
-        { "Main Menu", 0x4E49414Du },
-        { "Time Attack", 0x454D4954u },
+        { "Title Screen",  0x4C544954u },
+        { "Main Menu",     0x4E49414Du },
+        { "Time Attack",   0x454D4954u },
     };
+
+    // Setting up a time bonus start value for RTA-TB timing method
+    vars.TimeBonusStartValue = 0;
 
     // Functions we are gonna use in the script
     vars.Func = new ExpandoObject();
     vars.Func.StartTrigger = (Func<bool>)(() => vars.watchers["ZoneIndicator"].Current == vars.ZoneIndicator["Main Menu"] && vars.watchers["State"].Current == 7 && vars.watchers["State"].Old == 6);
-    vars.Func.ResetTrigger = (Func<bool>)(() => vars.watchers["ZoneIndicator"].Current == vars.ZoneIndicator["Main Menu"] && vars.watchers["State"].Current == 2 && vars.watchers["State"].Old == 1);
+    vars.Func.ResetTrigger = (Func<bool>)(() => vars.watchers["ZoneIndicator"].Current == vars.ZoneIndicator["Main Menu"] && vars.watchers["State"].Current == 5 && vars.watchers["State"].Changed);
     vars.Func.ResetIGTBuffers = (Action)(() => { vars.AccumulatedIGT = vars.BufferIGT = 0d; });
+    vars.Func.IsInTimeBonus = (Func<bool>)(() => vars.TimeBonusStartValue != 0 && vars.watchers["TimeBonus"].Current != vars.TimeBonusStartValue);
+    vars.Func.FindFinalBossHp = (Func<int>)(() => vars.watchers["LevelID"].Current == 68 ? vars.watchers["bhpGood"].Current : vars.watchers["LevelID"].Current == 69 ? vars.watchers["bhpBad"].Current : 0xFF);
 
     // Reset the IGT variables to generate them. Avoid throwing an exception later
     vars.Func.ResetIGTBuffers();
@@ -132,7 +148,8 @@ update
         : (double)vars.watchers["mins"].Current * 60 + (double)vars.watchers["seconds"].Current + (vars.HasCentisecsBug ? 0 : (double)vars.watchers["centisecs"].Current / 100 );
     
     // Reset the buffer IGT variables when the timer is stopped
-    if (timer.CurrentPhase == TimerPhase.NotRunning) vars.Func.ResetIGTBuffers();
+    if (timer.CurrentPhase == TimerPhase.NotRunning)
+        vars.Func.ResetIGTBuffers();
 
     if (current.IGT < old.IGT)
     {
@@ -143,6 +160,12 @@ update
     // Reset centisecs when starting a new run
     if (settings["centisecsBug"] && vars.HasCentisecsBug && vars.Func.StartTrigger())
         game.WriteValue<byte>((IntPtr)vars.CentisecsOffset, 0);
+
+    // Time Bonus start value
+    if (vars.watchers["TimeBonus"].Old == 0 && vars.watchers["TimeBonus"].Changed)
+        vars.TimeBonusStartValue = vars.watchers["TimeBonus"].Current;
+    else if (vars.watchers["TimeBonus"].Current == 0)
+        vars.TimeBonusStartValue = 0;
 }
 
 split
@@ -162,16 +185,19 @@ split
         return settings[old.Act.ToString()];
 
     // Final boss split
-    current.FinalBossHp = vars.watchers["LevelID"].Current == 68 ? vars.watchers["bhpGood"].Current
-        : vars.watchers["LevelID"].Current == 69 ? vars.watchers["bhpBad"].Current
-        : 0xFF;
-    if (old.FinalBossHp == 1 & current.FinalBossHp == 0 && current.IGT != 0)
+    current.FinalBossHp = vars.Func.FindFinalBossHp();
+    if (!settings["RTA-TB"] && old.FinalBossHp == 1 & current.FinalBossHp == 0 && current.IGT != 0)
+        return settings["20"];
+
+    // Final boss split in RTA-TB
+    if (old.Act == 20 && vars.watchers["LevelID"].Current == 1)
         return settings["20"];
 }
 
 gameTime
 {
-    return TimeSpan.FromSeconds(current.IGT + vars.AccumulatedIGT - vars.BufferIGT + (vars.HasCentisecsBug ? (double)vars.watchers["centisecs"].Current / 60 : 0));
+    if (!settings["RTA-TB"])
+        return TimeSpan.FromSeconds(current.IGT + vars.AccumulatedIGT - vars.BufferIGT + (vars.HasCentisecsBug ? (double)vars.watchers["centisecs"].Current / 60 : 0));
 }
 
 start
@@ -186,5 +212,5 @@ reset
 
 isLoading
 {
-    return true;
+	return settings["RTA-TB"] ? vars.Func.IsInTimeBonus() : true;
 }
