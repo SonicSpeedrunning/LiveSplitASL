@@ -1,12 +1,17 @@
 state("soniccd") {}
 state("RSDKv3_64") {}
 state("RSDKv3") {}
+state("RSDKv3_HW") {}
+state("Sonic CD") {}
+state("Sonic CD_64") {}
 
 init
 {
-    vars.HasCentisecsBug = false;
-    vars.CentisecsOffset = IntPtr.Zero;
-    
+    if (modules.First().ModuleMemorySize == 0x1090000)
+        version = "Retail (Steam)";
+    else
+        version = "Decompilation (" + (game.Is64Bit() ? "64" : "32") + " bit)";
+
     // Define main watcher variable
     vars.watchers = new MemoryWatcherList();
     var scanner = new SignatureScanner(game, modules.First().BaseAddress, modules.First().ModuleMemorySize);
@@ -14,65 +19,104 @@ init
     if (ptr == IntPtr.Zero)
         throw new Exception();
 
-    switch (game.ProcessName.ToLower())
-    {
-        case "soniccd":
-            vars.CentisecsOffset = modules.First().BaseAddress + 0x804EFB;
-            vars.HasCentisecsBug = true;
-            vars.watchers.Add(new MemoryWatcher<byte>(vars.CentisecsOffset) { Name = "centisecs" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xE2A378) { Name = "seconds" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xF9F2F3) { Name = "mins" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xF9F294) { Name = "LevelID" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC3E79A) { Name = "State" });
-            vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xC0721C) { Name = "DemoMode" });
-            vars.watchers.Add(new MemoryWatcher<uint>(modules.First().BaseAddress + 0xE2A37C) { Name = "ZoneIndicator" });
-            vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xFC5810) { Name = "TimerIsRunning" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC40EB8) { Name = "bhpGood" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC40EFC) { Name = "bhpBad" });
-            vars.watchers.Add(new MemoryWatcher<int>(modules.First().BaseAddress + 0xC3DEFC) { Name = "TimeBonus" });
-            break;
-
-        case "rsdkv3_64":
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x811F64) { Name = "centisecs" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x8120A4) { Name = "seconds" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x811F68) { Name = "mins" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x80FA3C) { Name = "LevelID" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7BA4F2) { Name = "State" });
-            vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xBA337C) { Name = "DemoMode" });
-            vars.watchers.Add(new MemoryWatcher<uint>(modules.First().BaseAddress + 0x811F70) { Name = "ZoneIndicator" });
-            vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xAC0B8) { Name = "TimerIsRunning" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7BCC10) { Name = "bhpGood" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7BCC54) { Name = "bhpBad" });
-            vars.watchers.Add(new MemoryWatcher<int>(modules.First().BaseAddress + 0x7B9C54) { Name = "TimeBonus" });
-            break;
-
-        case "rsdkv3":
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7EACA8) { Name = "centisecs" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7EADE8) { Name = "seconds" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7EACAC) { Name = "mins" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x9A2F6C) { Name = "LevelID" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x78F272) { Name = "State" });
-            vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xB7B4DC) { Name = "DemoMode" });
-            vars.watchers.Add(new MemoryWatcher<uint>(modules.First().BaseAddress + 0x7EACB0) { Name = "ZoneIndicator" });
-            vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0x88090) { Name = "TimerIsRunning" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x791990) { Name = "bhpGood" });
-            vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0x7919D4) { Name = "bhpBad" });
-            vars.watchers.Add(new MemoryWatcher<int>(modules.First().BaseAddress + 0x78E9D4) { Name = "TimeBonus" });
-
-        break;
-    }
-
     // Placeholder for current status variables the script needs. Prevents LiveSplit from throwing exceptions
     current.IGT = 0d;
     current.Act = 0xFF;
     current.FinalBossHp = 0xFF;
+    vars.HasCentisecsBug = false;
+    vars.CentisecsOffset = IntPtr.Zero;
+    
+    // Retail steam version is unlikely to ever change. No point in using sigscanning here
+    if (version == "Retail (Steam)")
+    {
+        vars.CentisecsOffset = modules.First().BaseAddress + 0x804EFB;
+        vars.HasCentisecsBug = true;
+        vars.watchers.Add(new MemoryWatcher<uint>(modules.First().BaseAddress + 0xE2A37C) { Name = "ZoneIndicator" });
+        vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xC0721C) { Name = "DemoMode" });
+        vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC3E79A) { Name = "State" });
+        vars.watchers.Add(new MemoryWatcher<int> (modules.First().BaseAddress + 0xC3DEFC) { Name = "TimeBonus" });
+        vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC40EB8) { Name = "bhpGood" });
+        vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xC40EFC) { Name = "bhpBad" });
+        vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xF9F294) { Name = "LevelID" });
+        vars.watchers.Add(new MemoryWatcher<bool>(modules.First().BaseAddress + 0xFC5810) { Name = "TimerIsRunning" });
+        vars.watchers.Add(new MemoryWatcher<byte>(vars.CentisecsOffset)                   { Name = "centisecs" });
+        vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xE2A378) { Name = "seconds" });
+        vars.watchers.Add(new MemoryWatcher<byte>(modules.First().BaseAddress + 0xF9F2F3) { Name = "mins" });
+        return;
+    }
+    
+    // Decompilation (RSDKv3)
+    // At the time of writing (March 3rd, 2022), sigscanning works for all versions of the decompilation.
+    if (version.Contains("Decompilation"))
+    {
+        Func<int, int, int, bool, IntPtr> pointerPath;
+
+        switch (game.Is64Bit())
+        {
+            case true:
+                ptr = scanner.Scan(new SigScanTarget(7, "41 8B C6 4D 8D B4 24") { OnFound = (p, s, addr) => modules.First().BaseAddress + p.ReadValue<int>(addr) });
+                if (ptr == IntPtr.Zero)
+                    throw new Exception();
+                vars.watchers.Add(new MemoryWatcher<uint>(ptr) { Name = "ZoneIndicator" });
+
+                ptr = scanner.Scan(new SigScanTarget(4, "41 8B 8C 8A ???????? 49 03 CA") { OnFound = (p, s, addr) => modules.First().BaseAddress + p.ReadValue<int>(addr) });
+                if (ptr == IntPtr.Zero)
+                    throw new Exception();
+                pointerPath = (int offset1, int offset2, int offset3, bool absolute) =>
+                {
+                    int tempOffset = game.ReadValue<int>(ptr + offset1);
+                    IntPtr tempOffset2 = modules.First().BaseAddress + tempOffset + offset2;
+                    if (absolute)
+                        return modules.First().BaseAddress + game.ReadValue<int>(tempOffset2) + offset3;
+                    else
+                        return tempOffset2 + 0x4 + game.ReadValue<int>(tempOffset2) + offset3;
+                };
+                vars.watchers.Add(new MemoryWatcher<bool>(pointerPath(0x4 * 11,  7, 0x1AC,  true )) { Name = "DemoMode" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 19, 10, 0x10B2, false)) { Name = "State" });
+                vars.watchers.Add(new MemoryWatcher<int> (pointerPath(0x4 * 37, 10, 0x814,  false)) { Name = "TimeBonus" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 32, 10, 0x37D0, false)) { Name = "bhpGood" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 32, 10, 0x3814, false)) { Name = "bhpBad" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 120, 2, 0,      false)) { Name = "LevelID" });
+                vars.watchers.Add(new MemoryWatcher<bool>(pointerPath(0x4 * 121, 3, 0,      false)) { Name = "TimerIsRunning" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 122, 2, 0,      false)) { Name = "centisecs" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 123, 2, 0,      false)) { Name = "seconds" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 124, 2, 0,      false)) { Name = "mins" });
+                break;
+
+            case false:
+                ptr = scanner.Scan(new SigScanTarget(2, "0F 85 ???????? 8A 88") { OnFound = (p, s, addr) => addr + p.ReadValue<int>(addr) + 0x4 + 0x2 });
+                if (ptr == IntPtr.Zero)
+                    throw new Exception();
+                vars.watchers.Add(new MemoryWatcher<uint>((IntPtr)game.ReadValue<int>(ptr)) { Name = "ZoneIndicator" });
+
+                ptr = scanner.Scan(new SigScanTarget(3, "FF 24 85 ???????? A1") { OnFound = (p, s, addr) => (IntPtr)p.ReadValue<int>(addr) });
+                if (ptr == IntPtr.Zero)
+                    throw new Exception();
+                pointerPath = (int offset1, int offset2, int offset3, bool absolute) => (IntPtr)new DeepPointer(ptr + offset1, offset2).Deref<int>(game) + offset3;
+                vars.watchers.Add(new MemoryWatcher<bool>(pointerPath(0x4 * 11,  0x3, 0x1AC,  true)) { Name = "DemoMode" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 19,  0xB, 0x1078, true)) { Name = "State" });
+                vars.watchers.Add(new MemoryWatcher<int> (pointerPath(0x4 * 25,  0xA, 0x7F8,  true)) { Name = "TimeBonus" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 32,  0xA, 0x37C8, true)) { Name = "bhpGood" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 32,  0xA, 0x380C, true)) { Name = "bhpBad" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 120, 0x1, 0,      true)) { Name = "LevelID" });
+                vars.watchers.Add(new MemoryWatcher<bool>(pointerPath(0x4 * 121, 0x3, 0,      true)) { Name = "TimerIsRunning" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 122, 0x1, 0,      true)) { Name = "centisecs" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 123, 0x1, 0,      true)) { Name = "seconds" });
+                vars.watchers.Add(new MemoryWatcher<byte>(pointerPath(0x4 * 124, 0x1, 0,      true)) { Name = "mins" });
+                break;
+        }
+        return;
+    }
+
+    // In case of future versions of the game remember to add the code before this line
+    throw new Exception("Game unknown!");
 }
 
 startup
 {
     // Basic settings
     settings.Add("centisecsBug", false, "Remove centiseconds from the timer when starting a new run");
-    settings.SetToolTip("centisecsBug", "Partial mitigation of the centiseconds bug on the steam release of Sonic CD (2011).\nIf enabled, LiveSplit will automatizally set the centiseconds to 0 at the start of a new run.\nThis setting has no effect on ther releases of the game.");
+    settings.SetToolTip("centisecsBug", "Partial mitigation of the centiseconds bug on the steam release of Sonic CD (2011).\nIf enabled, LiveSplit will automatizally set the centiseconds to 0 at the start of a new run.\nThis setting has no effect on any other release of the game.");
     settings.Add("RTA-TB", false, "Use All Time Stones timing rules");
     settings.SetToolTip("RTA-TB", "If enabled, LiveSplit's behaviour will be changed in order to reflect the different\ntiming rules used in the \"All Time Stones\" category:\n• RTA-TB (Time Bonus) will be used as Game Time instead of IGT\n• The final split will occur after the screen fades to white in Metallic Madness 3");
     settings.Add("autosplitting", true, "Autosplitting");
@@ -188,9 +232,8 @@ split
     current.FinalBossHp = vars.Func.FindFinalBossHp();
     if (!settings["RTA-TB"] && old.FinalBossHp == 1 & current.FinalBossHp == 0 && current.IGT != 0)
         return settings["20"];
-
     // Final boss split in RTA-TB
-    if (old.Act == 20 && vars.watchers["LevelID"].Current == 1)
+    else if (settings["RTA-TB"] && old.Act == 20 && vars.watchers["LevelID"].Current == 1)
         return settings["20"];
 }
 
